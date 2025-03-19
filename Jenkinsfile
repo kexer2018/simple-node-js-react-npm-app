@@ -1,23 +1,39 @@
 pipeline {
-    agent { 
-        dockerContainer { 
-            image 'node:18'  // 使用官方Node.js镜像
-            remoteFs '/app'  // 可选：设置容器内工作目录
-        } 
-    }
+    agent any  // 在任意可用的 Jenkins 节点运行
+
     tools {
-        nodejs "default"  // 确保与全局配置名称一致
+        nodejs 'node-lts'  // 使用我们在 Global Tool Configuration 里配置的 Node.js 版本
     }
+
     stages {
-        stage('Build') {
+        stage('Checkout Code') {
             steps {
-                sh 'npm install'
-                sh 'npm run build'  // 根据项目调整命令（如React需用npm run build）
+                git branch: 'master', url: 'https://github.com/kexer2018/simple-node-js-react-npm-app.git'
             }
         }
-        stage('Run') {
+
+        stage('Install Dependencies') {
             steps {
-                sh 'npm start'  // 启动React应用（默认监听3000端口）
+                sh 'npm install'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh 'npm test'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'npm run build'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying application...'
+                // 这里可以添加部署到服务器的脚本，例如使用 SCP、Docker 或 Kubernetes 部署
             }
         }
     }
